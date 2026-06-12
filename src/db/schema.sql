@@ -84,12 +84,16 @@ CREATE TABLE IF NOT EXISTS rent_payments (
   balance NUMERIC(10,2) GENERATED ALWAYS AS (amount_due - amount_paid) STORED,
   payment_date DATE,
   payment_mode VARCHAR(30) CHECK (payment_mode IN ('cash', 'upi', 'bank_transfer')),
+  collected_by VARCHAR(100),
   is_advance BOOLEAN DEFAULT FALSE,
   is_late BOOLEAN DEFAULT FALSE,
   notes TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+ALTER TABLE rent_payments
+ADD COLUMN IF NOT EXISTS collected_by VARCHAR(100);
 
 -- Expenses
 CREATE TABLE IF NOT EXISTS expenses (

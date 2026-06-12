@@ -70,9 +70,9 @@ INSERT INTO agreements (unit_id, tenant_id, start_date, end_date, monthly_rent, 
 UPDATE units SET is_occupied = TRUE WHERE id IN (1, 11);
 
 -- Insert Some dummy payments
-INSERT INTO rent_payments (agreement_id, unit_id, tenant_id, payment_month, amount_due, amount_paid, payment_date, payment_mode) VALUES
-(1, 1, 1, '2024-05-01', 10000, 10000, '2024-05-05', 'upi'),
-(2, 11, 2, '2024-05-01', 15000, 15000, '2024-05-02', 'bank_transfer');
+INSERT INTO rent_payments (agreement_id, unit_id, tenant_id, payment_month, amount_due, amount_paid, payment_date, payment_mode, collected_by) VALUES
+(1, 1, 1, '2024-05-01', 10000, 10000, '2024-05-05', 'upi', 'Super Admin'),
+(2, 11, 2, '2024-05-01', 15000, 15000, '2024-05-02', 'bank_transfer', 'Super Admin');
 
 -- Insert Some dummy expenses
 INSERT INTO expenses (property_id, category, amount, expense_date, description, payment_mode) VALUES

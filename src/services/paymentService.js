@@ -10,6 +10,7 @@ const writableFields = [
   'amount_paid',
   'payment_date',
   'payment_mode',
+  'collected_by',
   'is_advance',
   'is_late',
   'notes',
@@ -42,6 +43,7 @@ const list = async () => {
         SUM(amount_paid) AS amount_paid,
         MAX(payment_date) AS payment_date,
         MAX(payment_mode) AS payment_mode,
+        MAX(collected_by) AS collected_by,
         BOOL_OR(is_advance) AS is_advance,
         BOOL_OR(is_late) AS is_late,
         STRING_AGG(NULLIF(notes, ''), ' | ') AS notes
@@ -60,6 +62,7 @@ const list = async () => {
       COALESCE(pt.amount_due, am.monthly_rent) - COALESCE(pt.amount_paid, 0) AS balance,
       pt.payment_date,
       pt.payment_mode,
+      pt.collected_by,
       COALESCE(pt.is_advance, false) AS is_advance,
       COALESCE(pt.is_late, false) AS is_late,
       pt.notes,
@@ -103,17 +106,17 @@ const create = async (data) => {
     const newTotalPaid = Number(existingPayment.amount_paid) + Number(data.amount_paid || 0);
     const result = await pool.query(
       `UPDATE rent_payments
-       SET amount_paid = $1, payment_date = $2, payment_mode = $3, notes = CONCAT(COALESCE(notes, ''), ' | ', $4::text), updated_at = NOW()
-       WHERE id = $5 RETURNING *`,
-      [newTotalPaid, data.payment_date, data.payment_mode, data.notes || '', existingPayment.id]
+       SET amount_paid = $1, payment_date = $2, payment_mode = $3, collected_by = $4, notes = CONCAT(COALESCE(notes, ''), ' | ', $5::text), updated_at = NOW()
+       WHERE id = $6 RETURNING *`,
+      [newTotalPaid, data.payment_date, data.payment_mode, data.collected_by, data.notes || '', existingPayment.id]
     );
     return result.rows[0];
   }
 
   const result = await pool.query(
     `INSERT INTO rent_payments
-     (agreement_id, unit_id, tenant_id, payment_month, amount_due, amount_paid, payment_date, payment_mode, is_advance, is_late, notes)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+     (agreement_id, unit_id, tenant_id, payment_month, amount_due, amount_paid, payment_date, payment_mode, collected_by, is_advance, is_late, notes)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
     [
       data.agreement_id,
       data.unit_id,
@@ -123,6 +126,7 @@ const create = async (data) => {
       data.amount_paid || 0,
       data.payment_date,
       data.payment_mode,
+      data.collected_by,
       data.is_advance || false,
       data.is_late || false,
       data.notes,
